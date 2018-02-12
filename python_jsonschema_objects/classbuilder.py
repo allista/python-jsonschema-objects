@@ -221,20 +221,22 @@ class ProtocolBase(collections.MutableMapping):
       return setattr(self,key, val)
 
     def __delitem__(self, key):
-        if key in self._extended_properties:
-            del self._extended_properties[key]
-            return
-
         return delattr(self, key)
 
     def __getattr__(self, name):
         if name in self.__prop_names__:
             raise KeyError(name)
         if name not in self._extended_properties:
-            raise AttributeError("{0} is not a valid property of {1}".format(
-                                 name, self.__class__.__name__))
+            raise AttributeError("{0} is not a valid property of {1}"
+                                 .format(name, self.__class__.__name__))
 
         return self._extended_properties[name]
+
+    def __delattr__(self, key):
+        if key in self._extended_properties:
+            del self._extended_properties[key]
+        else:
+            return object.__delattr__(self, key)
 
     @classmethod
     def propinfo(cls, propname):
@@ -832,6 +834,6 @@ def make_property(prop, info, desc=""):
         if prop in self.__required__:
             raise AttributeError("'%s' is required" % prop)
         else:
-            del self._properties[prop]
+            self._properties[prop] = None
 
     return property(getprop, setprop, delprop, desc)
