@@ -513,7 +513,7 @@ class ClassBuilder(object):
                 clsdata,
                 parent,**kw)
             return self.resolved[uri]
-        elif clsdata.get('type') in ('integer', 'number', 'string', 'boolean', 'null'):
+        elif clsdata.get('type') in ('integer', 'number', 'string', 'boolean', 'null', 'array'):
             self.resolved[uri] = self._build_literal(
                 uri,
                 clsdata)
@@ -615,8 +615,8 @@ class ClassBuilder(object):
                                             {'type': potential}, desc
                                             )
 
-            elif 'type' in detail and detail['type'] == 'array':
-                if 'items' in detail and isinstance(detail['items'], dict):
+            elif 'type' in detail and detail['type'] == 'array' and 'items' in detail:
+                if isinstance(detail['items'], dict):
                     if '$ref' in detail['items']:
                         uri = util.resolve_ref_uri(
                             self.resolver.resolution_scope,
@@ -657,7 +657,7 @@ class ClassBuilder(object):
                     props[prop] = make_property(prop,
                                                 propdata,
                                                 typ.__doc__)
-                elif 'items' in detail:
+                else:
                     typs = []
                     for i, elem in enumerate(detail['items']):
                         uri = "{0}/{1}/<anonymous_{2}>".format(nm, prop, i)

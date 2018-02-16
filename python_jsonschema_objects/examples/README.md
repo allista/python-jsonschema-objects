@@ -43,7 +43,10 @@ For example, given the following schema:
         },
         "deceased": {
             "enum": ["yes", "no", 1, 0, "true", "false"]
-            }
+            },
+        "misc_items": {
+            "type": "array"
+        }
     },
     "required": ["firstName", "lastName"]
 }
@@ -58,13 +61,13 @@ here that the schema above has been loaded in a variable called
 >>> builder = pjs.ObjectBuilder(examples['Example Schema'])
 >>> ns = builder.build_classes()
 >>> Person = ns.ExampleSchema
->>> james = Person(firstName="James", lastName="Bond")
+>>> james = Person(firstName="James", lastName="Bond", misc_items=[0,0,7])
 >>> james.lastName
 <Literal<str> Bond>
 >>> james.lastName == "Bond"
 True
 >>> james
-<example_schema address=None age=None deceased=None dogs=None firstName=<Literal<str> James> gender=None lastName=<Literal<str> Bond>>
+<example_schema address=None age=None deceased=None dogs=None firstName=<Literal<str> James> gender=None lastName=<Literal<str> Bond> misc_items=<Literal<list> [0, 0, 7]>>
 
 ```
 
@@ -83,7 +86,7 @@ through to the standard library JSONEncoder object.
 
 ``` python
 >>> james.serialize(sort_keys=True)
-'{"firstName": "James", "lastName": "Bond"}'
+'{"firstName": "James", "lastName": "Bond", "misc_items": [0, 0, 7]}'
 
 ```
 
@@ -240,7 +243,11 @@ classes.
             "type": "object",
             "properties": {
                 "message": {"type": "string"},
-                "reference": {"$ref": "#/definitions/B"}
+                "reference": {"$ref": "#/definitions/B"},
+                "others": { 
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/A"}
+                }
             },
             "required": ["message"]
         },
@@ -271,7 +278,7 @@ ValidationError: '[u'author']' are required attributes for B
 >>> b.author = "James Dean"
 >>> a.reference = b
 >>> a
-<A message=<Literal<str> foo> reference=<B author=<Literal<str> James Dean> oreference=None>>
+<A message=<Literal<str> foo> others=None reference=<B author=<Literal<str> James Dean> oreference=None>>
 
 ```
 
